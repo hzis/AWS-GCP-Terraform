@@ -6,7 +6,11 @@ Example for an application where you need web servers to serve the traffic from 
 We'll need to create the following resources for both AWS and GCP:
 
   a. VM machines
+  
   b. SQL database
+  
   c. web-server 
+  
   d. VPC, firewalls 
+  
   e. load balancer, auto scaler
