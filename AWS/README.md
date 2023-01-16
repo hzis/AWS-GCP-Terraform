@@ -1,4 +1,4 @@
-1.Create Resources
+1. Create Resources
 
   a. VM machines
 
