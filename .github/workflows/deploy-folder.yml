@@ -1,0 +1,25 @@
+name: Deploy Folder Workflow
+
+on:
+  workflow_call:
+    inputs:
+      folder:
+        description: 'The folder to sync/deploy'
+        required: true
+      target_host:
+        description: 'Target host for deployment'
+        required: true
+
+jobs:
+  sync-folder:
+    name: Sync Folder to Target Host
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
+    - name: Sync folder to target host
+      run: |
+        echo "Syncing ${{ inputs.folder }} to ${{ inputs.target_host }}"
+        rsync -avz --delete ./${{ inputs.folder }}/ user@${{ inputs.target_host }}:/path/to/zabbix/scripts/${{ inputs.folder }}/
