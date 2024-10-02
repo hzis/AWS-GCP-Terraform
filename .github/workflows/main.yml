@@ -1,0 +1,33 @@
+name: Zabbix Script Deployment
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    name: Detect Changed Folders
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
+    - name: Get list of changed files
+      id: changes
+      run: |
+        # Get list of changed files and extract the unique folders
+        changed_files=$(git diff --name-only origin/main ${{ github.sha }})
+        changed_folders=$(echo "$changed_files" | grep '/' | cut -d '/' -f1 | sort -u)
+        echo "Changed folders: $changed_folders"
+        echo "::set-output name=folders::$changed_folders"
+
+    - name: Deploy changed folders
+      run: |
+        for folder in ${{ steps.changes.outputs.folders }}; do
+          echo "Triggering deployment for $folder"
+          gh workflow run .github/workflows/deploy-folder.yml \
+            -f folder=$folder \
+            -f target_host="ops-zbx-prxy-3-test-gcp.eng.sfdc.net"
+        done
