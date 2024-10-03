@@ -18,7 +18,7 @@ jobs:
           echo "PR description must include a WorkItem annotation in the format '@W-12345678'."
           exit 1
         fi
-        
+
     - name: Checkout the repository
       uses: actions/checkout@v3
 
@@ -31,6 +31,23 @@ jobs:
         echo "Changed folders: $changed_folders"
         echo "::set-output name=folders::$changed_folders"
 
+    - name: Check for run test annotation
+      id: test_annotation
+      run: |
+        pr_body=$(jq -r '.pull_request.body' $GITHUB_EVENT_PATH)
+        echo "PR Body: $pr_body"
+        
+        # Extract command if #run-test annotation is found
+        if echo "$pr_body" | grep -q "#run-test"; then
+          echo "Run test annotation found."
+          # Extract the command
+          command=$(echo "$pr_body" | grep -oP '#run-test \K.*')
+          echo "command=$command" >> $GITHUB_ENV
+        else
+          echo "Run test annotation not found."
+          echo "run_test=false" >> $GITHUB_ENV
+        fi
+
     - name: Deploy changed folders
       run: |
         for folder in ${{ steps.changes.outputs.folders }}; do
@@ -39,3 +56,12 @@ jobs:
             -f folder=$folder \
             -f target_host="ops-zbx-prxy-3-test-gcp.eng.sfdc.net"
         done
+
+    - name: Run tests if annotation is present
+      if: env.run_test != 'false'
+      run: |
+        echo "Running remote host tests with command:"
+        echo "${{ env.command }}"
+
+        # Execute the command extracted from the annotation
+        eval "${{ env.command }}"
