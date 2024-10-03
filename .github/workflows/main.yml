@@ -46,6 +46,7 @@ jobs:
           echo "run_test=true" >> $GITHUB_ENV
         else
           echo "Run test annotation not found."
+          echo "Example of annotation to execute the test: '#run-test python3 script.py --branch main_ --autobuild PRECHECKIN --culprit_change 49153210 --fix_change 49165301 --build_breakage yes'."
           echo "run_test=false" >> $GITHUB_ENV
         fi
 
