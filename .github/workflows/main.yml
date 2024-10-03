@@ -1,9 +1,12 @@
 name: Zabbix Script Deployment
 
 on:
-  pull_request:
+  push:
     branches:
-      - master
+      - master  # For test deployment on commit
+  pull_request:
+    types:
+      - closed  # For prod deployment on merge
 
 jobs:
   detect-changes:
@@ -11,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
     - name: Check PR Description for WorkItem
       if: ${{ github.event_name == 'pull_request' }}
       run: |
@@ -18,9 +24,6 @@ jobs:
           echo "PR description must include a WorkItem annotation in the format '@W-12345678'."
           exit 1
         fi
-
-    - name: Checkout the repository
-      uses: actions/checkout@v3
 
     - name: Get list of changed files
       id: changes
@@ -31,50 +34,30 @@ jobs:
         echo "Changed folders: $changed_folders"
         echo "::set-output name=folders::$changed_folders"
 
-    - name: Check for run test annotation
-      id: test_annotation
-      run: |
-        pr_body="${{ github.event.pull_request.body }}"
-        echo "PR Body: $pr_body"
-        
-        # Extract command if #run-test annotation is found
-        if echo "$pr_body" | grep -q "#run-test"; then
-          echo "Run test annotation found."
-          # Extract the command
-          command=$(echo "$pr_body" | grep -oP '#run-test \K.*')
-          echo "command=$command" >> $GITHUB_ENV
-          echo "run_test=true" >> $GITHUB_ENV
-        else
-          echo "Run test annotation not found."
-          echo "Example of annotation to execute the test: '#run-test python3 script.py --branch main_ --autobuild PRECHECKIN --culprit_change 49153210 --fix_change 49165301 --build_breakage yes'."
-          echo "run_test=false" >> $GITHUB_ENV
-        fi
+  deploy-to-test:
+    name: Deploy to Test Environment
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: github.event_name == 'push'
 
-    - name: Deploy changed folders
-      run: |
-        for folder in ${{ steps.changes.outputs.folders }}; do
-          echo "Triggering deployment for $folder"
-          gh workflow run .github/workflows/deploy-folder.yml \
-            -f folder=$folder \
-            -f target_host="ops-zbx-prxy-3-test-gcp.eng.sfdc.net"
-        done
+    steps:
+    - name: Call reusable workflow for test environment
+      uses: ./.github/workflows/deploy.yml
+      with:
+        target_host: "ops-zbx-prxy-3-test-gcp.eng.sfdc.net"
+        folders: ${{ steps.changes.outputs.folders }}
+        run_test: 'true'  # Assuming you want to run tests on commit
 
-    - name: Run tests if annotation is present
-      if: env.run_test == 'true'
-      run: |
-        echo "Running remote host tests with command:"
-        echo "${{ env.command }}"
+  deploy-to-prod:
+    name: Deploy to Production Environment
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: github.event.pull_request.merged == true
 
-        # Set -e ensures the script exits on any command failure
-        set -e
-
-        # Execute the command and capture the exit status
-        eval "${{ env.command }}"
-        
-        # Check if the script failed
-        if [ $? -ne 0 ]; then
-          echo "Test execution failed. Exiting..."
-          exit 1
-        fi
-
-        echo "Test execution completed successfully."
+    steps:
+    - name: Call reusable workflow for production environment
+      uses: ./.github/workflows/deploy.yml
+      with:
+        target_host: "ops-zbx-prxy-3-gcp.eng.sfdc.net"
+        folders: ${{ steps.changes.outputs.folders }}
+        run_test: 'false'  # No tests required for production deployment
