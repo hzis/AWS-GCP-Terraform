@@ -11,6 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Check PR Description for WorkItem
+      if: ${{ github.event_name == 'pull_request' }}
+      run: |
+        if [[ ! "${{ github.event.pull_request.body }}" =~ @W-[0-9]{8} ]]; then
+          echo "PR description must include a WorkItem annotation in the format '@W-12345678'."
+          exit 1
+        fi
+        
     - name: Checkout the repository
       uses: actions/checkout@v3
 
