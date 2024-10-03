@@ -1,0 +1,31 @@
+# .github/workflows/deploy.yml
+name: Reusable Deployment Workflow
+
+on:
+  workflow_call:
+    inputs:
+      target_host:
+        required: true
+        type: string
+      folders:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
+    - name: Deploy to target host
+      run: |
+        for folder in ${{ inputs.folders }}; do
+          echo "Deploying $folder to host: ${{ inputs.target_host }}"
+          # Here you would run your actual deployment command using the target host
+          # For example:
+          gh workflow run .github/workflows/deploy-folder.yml \
+            -f folder=$folder \
+            -f target_host="${{ inputs.target_host }}"
+        done
