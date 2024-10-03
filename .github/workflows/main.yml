@@ -34,7 +34,7 @@ jobs:
     - name: Check for run test annotation
       id: test_annotation
       run: |
-        pr_body=$(jq -r '.pull_request.body' $GITHUB_EVENT_PATH)
+        pr_body="${{ github.event.pull_request.body }}"
         echo "PR Body: $pr_body"
         
         # Extract command if #run-test annotation is found
@@ -43,6 +43,7 @@ jobs:
           # Extract the command
           command=$(echo "$pr_body" | grep -oP '#run-test \K.*')
           echo "command=$command" >> $GITHUB_ENV
+          echo "run_test=true" >> $GITHUB_ENV
         else
           echo "Run test annotation not found."
           echo "run_test=false" >> $GITHUB_ENV
@@ -58,7 +59,7 @@ jobs:
         done
 
     - name: Run tests if annotation is present
-      if: env.run_test != 'false'
+      if: env.run_test == 'true'
       run: |
         echo "Running remote host tests with command:"
         echo "${{ env.command }}"
