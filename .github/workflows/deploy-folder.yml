@@ -6,9 +6,11 @@ on:
       folder:
         description: 'The folder to sync/deploy'
         required: true
+        type: string
       target_host:
         description: 'Target host for deployment'
         required: true
+        type: string
 
 jobs:
   sync-folder:
