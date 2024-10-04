@@ -21,6 +21,8 @@ jobs:
     - name: Check PR Description for WorkItem (only on push to master or PRs)
       if: ${{ github.ref == 'refs/heads/master' || github.event_name == 'pull_request' }}
       run: |
+        echo $TITLE
+        echo $BODY
         echo "${{ github.event.pull_request.body }}" 
         if [[ ! "${{ github.event.pull_request.body }}" =~ @W-[0-9]{8} ]]; then
           echo "PR description must include a WorkItem annotation in the format '@W-12345678'."
