@@ -6,7 +6,9 @@ on:
       - '**'  # Trigger on all branches to validate and deploy on any branch commit
   pull_request:
     types:
-      - closed  # For prod deployment on merge
+      - opened    # Trigger on pull request creation
+      - synchronize  # Trigger on new commits to an open pull request
+      - closed    # Trigger when pull request is closed (for prod deployment)
 
 jobs:
   detect-changes:
@@ -17,9 +19,9 @@ jobs:
     - name: Checkout the repository
       uses: actions/checkout@v3
 
-    # This step will run on pull_request
+    # This step will run on pull_request opened and synchronize (new commits)
     - name: Check PR Description for WorkItem
-      if: ${{ github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize') }}
       run: |
         if [[ ! "${{ github.event.pull_request.body }}" =~ @W-[0-9]{8} ]]; then
           echo "PR body must include a WorkItem annotation in the format '@W-12345678'."
