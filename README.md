@@ -14,4 +14,3 @@ We'll need to create the following resources for both AWS and GCP:
   d. VPC, firewalls 
   
   e. load balancer, auto scaler
-
