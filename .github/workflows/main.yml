@@ -48,7 +48,7 @@ jobs:
 
     steps:
     - name: Call reusable workflow for test environment
-      uses: ./.github/workflows/deploy.yml@main
+      uses: ./.github/workflows/deploy.yml
       with:
         target_host: "ops-zbx-prxy-3-test-gcp.eng.sfdc.net"
         folders: ${{ env.folders }}
@@ -66,5 +66,5 @@ jobs:
       uses: ./.github/workflows/deploy.yml
       with:
         target_host: "ops-zbx-prxy-3-gcp.eng.sfdc.net"
-        folders: ${{ steps.changes.outputs.folders }}
+        folders: ${{ env.folders }}
         run_test: 'false'  # No tests required for production deployment
