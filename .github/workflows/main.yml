@@ -18,8 +18,8 @@ jobs:
       uses: actions/checkout@v3
 
     # This step will run on both push (for all branches) and pull_request
-    - name: Check PR Description for WorkItem (only on push to master or PRs)
-      if: ${{ github.ref == 'refs/heads/master' || github.event_name == 'pull_request' }}
+    - name: Check PR Description for WorkItem (only on push to main or PRs)
+      if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' }}
       run: |
         if [[ ! "${{ github.event.pull_request.body }}" =~ @W-[0-9]{8} ]]; then
           echo "PR description must include a WorkItem annotation in the format '@W-12345678'."
