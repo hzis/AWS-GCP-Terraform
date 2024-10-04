@@ -43,14 +43,14 @@ jobs:
     name: Deploy to Test Environment
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: github.ref != 'refs/heads/master'  # Only deploy to test on non-master branches
+    if: github.event_name == 'push' && env.folders != ''
 
     steps:
     - name: Call reusable workflow for test environment
       uses: ./.github/workflows/deploy.yml
       with:
         target_host: "ops-zbx-prxy-3-test-gcp.eng.sfdc.net"
-        folders: ${{ steps.changes.outputs.folders }}
+        folders: ${{ env.folders }}
         run_test: 'true'  # Assuming you want to run tests on commit
 
   # Deploy to production environment on PR merge to master
@@ -62,8 +62,9 @@ jobs:
 
     steps:
     - name: Call reusable workflow for production environment
+      if: env.folders != ''
       uses: ./.github/workflows/deploy.yml
       with:
         target_host: "ops-zbx-prxy-3-gcp.eng.sfdc.net"
-        folders: ${{ steps.changes.outputs.folders }}
+        folders: ${{ env.folders }}
         run_test: 'false'  # No tests required for production deployment
