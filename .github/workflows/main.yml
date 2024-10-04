@@ -33,7 +33,10 @@ jobs:
         changed_files=$(git diff --name-only origin/master ${{ github.sha }})
         changed_folders=$(echo "$changed_files" | grep '/' | cut -d '/' -f1 | sort -u)
         echo "Changed folders: $changed_folders"
-        echo "::set-output name=folders::$changed_folders"
+
+        # Set output using Environment Files
+        echo "folders=$changed_folders" >> $GITHUB_ENV
+
 
   # Deploy to the test environment on all branch commits
   deploy-to-test:
