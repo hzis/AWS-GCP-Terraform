@@ -30,7 +30,7 @@ jobs:
       id: changes
       run: |
         # Get list of changed files and extract the unique folders
-        changed_files=$(git diff --name-only origin/master ${{ github.sha }})
+        changed_files=$(git diff --name-only origin/main ${{ github.sha }})
         changed_folders=$(echo "$changed_files" | grep '/' | cut -d '/' -f1 | sort -u)
         echo "Changed folders: $changed_folders"
 
@@ -57,7 +57,7 @@ jobs:
         folders: ${{ needs.detect-changes.outputs.folders }}
         run_test: 'true'  # Assuming you want to run tests on commit
 
-  # Deploy to production environment on PR merge to master
+  # Deploy to production environment on PR merge to main
   deploy-to-prod:
     name: Deploy to Production Environment
     runs-on: ubuntu-latest
