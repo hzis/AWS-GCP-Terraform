@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout the repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # This step will run on both push (for all branches) and pull_request
     - name: Check PR Description for WorkItem (only on push to master or PRs)
