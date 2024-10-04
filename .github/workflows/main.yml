@@ -48,10 +48,10 @@ jobs:
 
     steps:
     - name: Call reusable workflow for test environment
-      uses: ./.github/workflows/deploy.yml
+      uses: ./.github/workflows/deploy.yml@main
       with:
         target_host: "ops-zbx-prxy-3-test-gcp.eng.sfdc.net"
-        folders: ${{ steps.changes.outputs.folders }}
+        folders: ${{ env.folders }}
         run_test: 'true'  # Assuming you want to run tests on commit
 
   # Deploy to production environment on PR merge to master
