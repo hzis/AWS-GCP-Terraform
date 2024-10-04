@@ -15,3 +15,4 @@ We'll need to create the following resources for both AWS and GCP:
   
   e. load balancer, auto scaler
 
+
