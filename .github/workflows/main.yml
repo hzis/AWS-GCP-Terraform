@@ -34,6 +34,11 @@ jobs:
         changed_folders=$(echo "$changed_files" | grep '/' | cut -d '/' -f1 | sort -u)
         echo "Changed folders: $changed_folders"
 
+        # Ensure folders is not empty, otherwise set it to "none"
+        if [ -z "$changed_folders" ]; then
+          changed_folders="none"
+        fi
+
         # Set output for use in other jobs
         echo "::set-output name=folders::$changed_folders"
 
@@ -42,7 +47,7 @@ jobs:
     name: Deploy to Test Environment
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: github.event_name == 'push' && needs.detect-changes.outputs.folders != ''
+    if: github.event_name == 'push' && needs.detect-changes.outputs.folders != 'none'
 
     steps:
     - name: Call reusable workflow for test environment
@@ -61,7 +66,7 @@ jobs:
 
     steps:
     - name: Call reusable workflow for production environment
-      if: needs.detect-changes.outputs.folders != ''
+      if: needs.detect-changes.outputs.folders != 'none'
       uses: ./.github/workflows/deploy.yml
       with:
         target_host: "ops-zbx-prxy-3-gcp.eng.sfdc.net"
