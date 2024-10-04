@@ -33,7 +33,7 @@ jobs:
       id: changes
       run: |
         # Get list of changed files and extract the unique folders
-        changed_files=$(git diff --name-only origin/main ${{ github.sha }})
+        changed_files=$(git diff --name-only origin/master ${{ github.sha }})
         changed_folders=$(echo "$changed_files" | grep '/' | cut -d '/' -f1 | sort -u)
         echo "Changed folders: $changed_folders"
         echo "::set-output name=folders::$changed_folders"
